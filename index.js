@@ -15,7 +15,19 @@ const app = express();
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
 
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+// app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+const allowedOrigins = ['https://superb-paprenjak-d79f58.netlify.app'];
+
+app.use(cors({
+  origin: function(origin, callback){
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
