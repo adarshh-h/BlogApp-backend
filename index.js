@@ -30,7 +30,7 @@ const secret = process.env.JWT_SECRET;
 // const cors = require('cors');
 
 // List of allowed origins
-const allowedOrigins = ['https://profound-sprinkles-22fdf2.netlify.app', 'https://superb-paprenjak-d79f58.netlify.app'];
+const allowedOrigins = ['https://profound-sprinkles-22fdf2.netlify.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
