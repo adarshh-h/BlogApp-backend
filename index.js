@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const express = require("express");
-const cors = require("cors");
+const cors = require('cors');
 const mongoose = require("mongoose");
 const User = require("./models/User");
 const Post = require("./models/Post");
@@ -27,7 +27,10 @@ const secret = process.env.JWT_SECRET;
 //     }
 //   }
 // }));
-const allowedOrigins = ['https://superb-paprenjak-d79f58.netlify.app'];
+// const cors = require('cors');
+
+// List of allowed origins
+const allowedOrigins = ['https://profound-sprinkles-22fdf2.netlify.app', 'https://superb-paprenjak-d79f58.netlify.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
