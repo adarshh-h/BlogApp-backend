@@ -340,25 +340,46 @@ app.post("/register", async (req, res) => {
 });
 
 // Route to log in a user
+// app.post("/login", async (req, res) => {
+//   const { username, password } = req.body;
+//   const userDoc = await User.findOne({ username });
+//   if (userDoc && userDoc.password) {
+//     const passOk = bcrypt.compareSync(password, userDoc.password);
+//     if (passOk) {
+//       // Logged in
+//       jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
+//         if (err) throw err;
+//         res.cookie("token", token).json({
+//           id: userDoc._id,
+//           username,
+//         });
+//       });
+//     } else {
+//       res.status(400).json("Wrong credentials");
+//     }
+//   } else {
+//     res.status(400).json("Wrong credentials");
+//   }
+// });
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const userDoc = await User.findOne({ username });
+  
   if (userDoc && userDoc.password) {
     const passOk = bcrypt.compareSync(password, userDoc.password);
     if (passOk) {
-      // Logged in
       jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
         if (err) throw err;
-        res.cookie("token", token).json({
+        res.cookie("token", token, { httpOnly: true }).json({
           id: userDoc._id,
           username,
         });
       });
     } else {
-      res.status(400).json("Wrong credentials");
+      res.status(400).json("wrong credential");
     }
   } else {
-    res.status(400).json("Wrong credentials");
+    res.status(400).json("wrong credential");
   }
 });
 
