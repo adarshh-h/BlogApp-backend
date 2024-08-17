@@ -266,8 +266,10 @@ const secret = process.env.JWT_SECRET;
 
 // Define allowed origins
 const allowedOrigins = ['https://profound-sprinkles-22fdf2.netlify.app'];
+// Middleware for parsing JSON and cookies
+app.use(express.json());
+app.use(cookieParser());
 
-// Set up CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -278,55 +280,31 @@ app.use(cors({
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true // Allow credentials (cookies)
+  credentials: true
 }));
 
 // Handle preflight requests
-// app.options('*', cors({
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   credentials: true
-// }));
-
-// Handle preflight requests
-app.options('/uploads/*', cors({
-  origin: 'https://profound-sprinkles-22fdf2.netlify.app',
+app.options('*', cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
-// Middleware for parsing JSON and cookies
-app.use(express.json());
-app.use(cookieParser());
-
 // Serve static files with CORS headers
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// // Optional: Apply CORS headers directly to static files if needed
-// app.use('/uploads', (req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", "https://profound-sprinkles-22fdf2.netlify.app");
-//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   next();
-// });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Apply CORS headers to static files
 app.use('/uploads', (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://profound-sprinkles-22fdf2.netlify.app");
+  res.header("Access-Control-Allow-Origin", "https://your-deployed-app-url.render.com");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
-
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI);
 
