@@ -259,6 +259,8 @@ const cookieParser = require("cookie-parser");
 const multer = require("multer");
 const fs = require("fs");
 
+const path = require('path');
+
 const app = express();
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
@@ -292,7 +294,17 @@ app.options('*', cors({
 
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static(__dirname + "/uploads"));
+
+// app.use("/uploads", express.static(__dirname + "/uploads"));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Handle CORS for static files
+  app.use('/uploads', (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://profound-sprinkles-22fdf2.netlify.app");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI);
