@@ -512,7 +512,7 @@ const allowedOrigins = ['https://profound-sprinkles-22fdf2.netlify.app', 'https:
 app.use(express.json());
 app.use(cookieParser());
 
-// Set up CORS middleware
+// CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -540,11 +540,15 @@ app.options('*', cors({
   credentials: true
 }));
 
-// Serve static files with CORS headers
+// Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log("Connected to MongoDB"))
+  .catch(err => console.error("Could not connect to MongoDB", err));
 
 // Middleware to authenticate token
 function authenticateToken(req, res, next) {
@@ -561,17 +565,19 @@ function authenticateToken(req, res, next) {
 }
 
 // Set up multer for file uploads
-const uploadMiddleware = multer({ dest: "uploads/" });
+const uploadMiddleware = multer({ dest: path.join(__dirname, 'uploads/') });
 
 // Route to register a new user
 app.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   try {
+    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "Email is already registered" });
     }
 
+    // Create a new user
     const userDoc = await User.create({
       username,
       email,
@@ -622,11 +628,11 @@ app.post("/post", authenticateToken, uploadMiddleware.single("file"), async (req
   let newPath = null;
 
   if (req.file) {
-    const { originalname, path } = req.file;
+    const { originalname, path: tempPath } = req.file;
     const parts = originalname.split(".");
     const ext = parts[parts.length - 1];
-    newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
+    newPath = path.join('uploads', req.file.filename + "." + ext);
+    fs.renameSync(tempPath, newPath);
   }
 
   const { title, summary, content } = req.body;
@@ -650,11 +656,11 @@ app.post("/post", authenticateToken, uploadMiddleware.single("file"), async (req
 app.put("/post", authenticateToken, uploadMiddleware.single("file"), async (req, res) => {
   let newPath = null;
   if (req.file) {
-    const { originalname, path } = req.file;
+    const { originalname, path: tempPath } = req.file;
     const parts = originalname.split(".");
     const ext = parts[parts.length - 1];
-    newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
+    newPath = path.join('uploads', req.file.filename + "." + ext);
+    fs.renameSync(tempPath, newPath);
   }
 
   const { id, title, summary, content } = req.body;
@@ -687,10 +693,12 @@ app.delete("/post/:id", authenticateToken, async (req, res) => {
       return res.status(403).json("You are not the author of this post");
     }
 
+    // Delete the post cover image if it exists
     if (postDoc.cover) {
       fs.unlinkSync(postDoc.cover);
     }
 
+    // Delete the post document
     await Post.findByIdAndDelete(id);
     res.json("Post deleted successfully");
   } catch (error) {
