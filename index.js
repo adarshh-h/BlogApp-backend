@@ -277,6 +277,9 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
+  // credentials: true // Allow credentials (cookies)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true // Allow credentials (cookies)
 }));
 
@@ -289,6 +292,9 @@ app.options('*', cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
+  // credentials: true
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
@@ -296,7 +302,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // app.use("/uploads", express.static(__dirname + "/uploads"));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Handle CORS for static files
   app.use('/uploads', (req, res, next) => {
@@ -305,7 +311,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   res.header("Access-Control-Allow-Headers", "Content-Type");
   next();
 });
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI);
 
